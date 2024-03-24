@@ -102,8 +102,20 @@ contract DiamondDeployer is Test, IDiamondCut {
 
     function testAucTokenFacet() public {
         uint256 userA_Bal = AUCTokenFacet(address(diamond)).balanceOf(A);
+        uint256 userB_Bal = AUCTokenFacet(address(diamond)).balanceOf(B);
+
+        uint256 totalSupply = userA_Bal + userB_Bal;
 
         assertEq(userA_Bal, 100_000_000e18);
+        assertEq(userB_Bal, 100_000_000e18);
+        assertEq(AUCTokenFacet(address(diamond)).totalSupply(), totalSupply);
+
+        switchSigner(A);
+        AUCTokenFacet(address(diamond)).transfer(E, 100_000e18);
+        uint256 userE_Bal = AUCTokenFacet(address(diamond)).balanceOf(E);
+        uint256 userA_BalAfterTx = AUCTokenFacet(address(diamond)).balanceOf(A);
+        assertEq(userE_Bal, 100_000e18);
+        assertEq(userA_Bal, (userA_BalAfterTx + userE_Bal));
     }
 
     function generateSelectors(
