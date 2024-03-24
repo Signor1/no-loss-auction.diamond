@@ -89,7 +89,7 @@ contract AuctionFacet {
         l.auctionIndex = l.auctionIndex + 1;
 
         //transfering the token from the msg.sender to the address(this)
-        IERC721(l.nftContractAddress).safeTransferFrom(
+        IERC721(l.nftContractAddress).transferFrom(
             msg.sender,
             address(this),
             _tokenId

@@ -136,6 +136,8 @@ contract DiamondDeployer is Test, IDiamondCut {
         uint256 auctionAmount = 100e18;
         uint256 tokenId = 0;
 
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
         boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
 
         uint8 index = 1;
