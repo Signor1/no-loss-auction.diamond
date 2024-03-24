@@ -235,29 +235,33 @@ contract AuctionFacet {
         if (l.auctions[_auctionId].auctionCreator == address(0)) {
             revert AUCTION_BY_INDEX_DOES_NOT_EXIST();
         }
-        if (!l.auctions[_auctionId].hasEnded) {
-            revert AUCTION_HAS_NOT_ENDED();
-        }
         if (l.auctions[_auctionId].highestBidder != msg.sender) {
             revert YOU_ARE_NOT_THE_HIGHEST_BIDDER();
         }
+        if (block.timestamp > l.auctions[_auctionId].duration) {
+            l.auctions[_auctionId].hasEnded = true;
 
-        //transfering the token from the address(this) to highest bidder
-        IERC721(l.nftContractAddress).safeTransferFrom(
-            address(this),
-            l.auctions[_auctionId].highestBidder,
-            l.auctions[_auctionId].nftTokenId
-        );
+            IERC721(l.nftContractAddress).approve(
+                msg.sender,
+                l.auctions[_auctionId].nftTokenId
+            );
+            //transfering the token from the address(this) to highest bidder
+            IERC721(l.nftContractAddress).transferFrom(
+                address(this),
+                l.auctions[_auctionId].highestBidder,
+                l.auctions[_auctionId].nftTokenId
+            );
 
-        l.auctions[_auctionId].hasEnded = true;
+            payOwnerOfAuctionedItem(_auctionId);
 
-        payOwnerOfAuctionedItem(_auctionId);
-
-        emit AuctionItemCollected(
-            _auctionId,
-            msg.sender,
-            l.auctions[_auctionId].nftTokenId
-        );
+            emit AuctionItemCollected(
+                _auctionId,
+                msg.sender,
+                l.auctions[_auctionId].nftTokenId
+            );
+        } else {
+            revert AUCTION_TIME_HAS_ELASPED();
+        }
     }
 
     //pay owner of auctioned item
