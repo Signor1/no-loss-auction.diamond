@@ -21,14 +21,8 @@ library LibAppStorage {
         mapping(address => uint256) balances;
         mapping(address => mapping(address => uint256)) allowances;
         //AUCTION
-        uint8 auctionCount;
+        uint8 auctionIndex;
         address nftContractAddress;
         mapping(uint8 => AuctionDetail) auctions;
     }
-
-    // function layoutStorage() internal pure returns (Layout storage l) {
-    //     assembly {
-    //         l.slot := 0
-    //     }
-    // }
 }
