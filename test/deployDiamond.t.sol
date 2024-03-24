@@ -126,6 +126,71 @@ contract DiamondDeployer is Test, IDiamondCut {
         assertEq(owner, C);
     }
 
+    function testAuctionCreationFailure1() public {
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 60;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        //wrong duration failure
+
+        vm.expectRevert(
+            abi.encodeWithSelector(AuctionFacet.WRONG_DURATION_ENTERED.selector)
+        );
+
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+    }
+
+    function testAuctionCreationFailure2() public {
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 0;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        //wrong initial starting bid amount failure
+        vm.expectRevert(
+            abi.encodeWithSelector(AuctionFacet.WRONG_PRICE_ENTERED.selector)
+        );
+
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+    }
+
+    function testAuctionCreationFailure3() public {
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        switchSigner(B);
+
+        //
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AuctionFacet.NOT_OWNER_OF_TOKEN_ENTERED.selector
+            )
+        );
+
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+    }
+
     function testAuctionCreation() public {
         switchSigner(A);
         MyNft(address(nft)).safeMint(A);
@@ -144,6 +209,7 @@ contract DiamondDeployer is Test, IDiamondCut {
         bool isAuctionCreated = boundAuction.doesAuctionExist(index);
 
         assertTrue(isAuctionCreated);
+        assertEq(isAuctionCreated, true);
     }
 
     function generateSelectors(

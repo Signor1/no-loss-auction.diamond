@@ -5,20 +5,20 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 import {LibAppConstant} from "../libraries/LibAppConstant.sol";
 
-/*=====  Custom Errors  =====*/
-error WRONG_DURATION_ENTERED();
-error WRONG_PRICE_ENTERED();
-error NOT_OWNER_OF_TOKEN_ENTERED();
-error AUCTION_TIME_HAS_ELASPED();
-error AUCTION_BY_INDEX_DOES_NOT_EXIST();
-error YOUR_BID_IS_LESS_THAN_THE_STARTING_BID();
-error TOKEN_BALANCE_IS_NOT_ENOUGH();
-error YOUR_BID_IS_NOT_ENOUGH();
-error AUCTION_HAS_NOT_ENDED();
-error YOU_ARE_NOT_THE_HIGHEST_BIDDER();
-
 contract AuctionFacet {
     LibAppStorage.Layout internal l;
+
+    /*=====  Custom Errors  =====*/
+    error WRONG_DURATION_ENTERED();
+    error WRONG_PRICE_ENTERED();
+    error NOT_OWNER_OF_TOKEN_ENTERED();
+    error AUCTION_TIME_HAS_ELASPED();
+    error AUCTION_BY_INDEX_DOES_NOT_EXIST();
+    error YOUR_BID_IS_LESS_THAN_THE_STARTING_BID();
+    error TOKEN_BALANCE_IS_NOT_ENOUGH();
+    error YOUR_BID_IS_NOT_ENOUGH();
+    error AUCTION_HAS_NOT_ENDED();
+    error YOU_ARE_NOT_THE_HIGHEST_BIDDER();
 
     /*=====  Events  =====*/
     event AuctionCreated(
