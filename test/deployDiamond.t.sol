@@ -371,6 +371,48 @@ contract DiamondDeployer is Test, IDiamondCut {
         assertEq(userB_BalBefore, userB_BalAfter + 1000e18);
     }
 
+    function testSuccessfulBidForTwoBidders() public {
+        // switching to the first bidder
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        //auction creation
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+
+        uint8 index = 1;
+        bool isAuctionCreated = boundAuction.doesAuctionExist(index);
+
+        assertTrue(isAuctionCreated);
+        assertEq(isAuctionCreated, true);
+
+        uint256 userA_BalBefore = AUCTokenFacet(address(diamond)).balanceOf(A);
+        //One successful Bidding
+        boundAuction.bidOnAuctionedItem(1000e18, 1);
+
+        uint256 userA_BalAfter = AUCTokenFacet(address(diamond)).balanceOf(A);
+
+        assertEq(userA_BalBefore, userA_BalAfter + 1000e18);
+
+        // switching to the second bidder
+        switchSigner(B);
+
+        uint256 userB_BalBefore = AUCTokenFacet(address(diamond)).balanceOf(B);
+        //One successful Bidding
+        boundAuction.bidOnAuctionedItem(10000e18, 1);
+
+        uint256 userB_BalAfter = AUCTokenFacet(address(diamond)).balanceOf(B);
+
+        assertGt(userB_BalBefore, userB_BalAfter);
+    }
+
     function generateSelectors(
         string memory _facetName
     ) internal returns (bytes4[] memory selectors) {
