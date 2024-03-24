@@ -14,6 +14,7 @@ import "forge-std/Test.sol";
 import "../contracts/Diamond.sol";
 
 import "../contracts/libraries/LibAppStorage.sol";
+import "../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 
 contract DiamondDeployer is Test, IDiamondCut {
     //contract types of facets to be deployed
@@ -42,7 +43,7 @@ contract DiamondDeployer is Test, IDiamondCut {
         ownerF = new OwnershipFacet();
         aucTokenFacet = new AUCTokenFacet();
         auctionFacet = new AuctionFacet();
-        nft = new MyNft(address(diamond));
+        nft = new MyNft();
 
         //upgrade diamond with facets
 
@@ -120,9 +121,27 @@ contract DiamondDeployer is Test, IDiamondCut {
 
     function testNFT() public {
         switchSigner(C);
-        MyNft(address(diamond)).safeMint(C);
-        address owner = MyNft(address(diamond)).ownerOf(0);
+        MyNft(address(nft)).safeMint(C);
+        address owner = MyNft(address(nft)).ownerOf(0);
         assertEq(owner, C);
+    }
+
+    function testAuctionCreation() public {
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+
+        uint8 index = 1;
+        bool isAuctionCreated = boundAuction.doesAuctionExist(index);
+
+        assertTrue(isAuctionCreated);
     }
 
     function generateSelectors(

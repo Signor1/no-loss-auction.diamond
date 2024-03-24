@@ -62,7 +62,8 @@ contract AuctionFacet {
         uint256 _tokenId
     ) external {
         //checking if the block timestamp is greater than the duration
-        if (block.timestamp > _duration) {
+        uint256 minDuration = 86400;
+        if (_duration < minDuration) {
             revert WRONG_DURATION_ENTERED();
         }
 
@@ -80,7 +81,7 @@ contract AuctionFacet {
         LibAppStorage.AuctionDetail storage a = l.auctions[_newId];
 
         a.auctionId = _newId;
-        a.duration = _duration;
+        a.duration = block.timestamp + _duration;
         a.startingBid = _startingBid;
         a.nftTokenId = _tokenId;
         a.auctionCreator = msg.sender;
@@ -303,5 +304,12 @@ contract AuctionFacet {
         } else {
             revert AUCTION_HAS_NOT_ENDED();
         }
+    }
+
+    function doesAuctionExist(uint8 _auctionId) external view returns (bool) {
+        if (l.auctions[_auctionId].auctionCreator == address(0)) {
+            revert AUCTION_BY_INDEX_DOES_NOT_EXIST();
+        }
+        return true;
     }
 }
