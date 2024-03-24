@@ -341,6 +341,36 @@ contract DiamondDeployer is Test, IDiamondCut {
         boundAuction.bidOnAuctionedItem(100_000_000_000e18, 1);
     }
 
+    function testOneSuccessfulBid() public {
+        switchSigner(B);
+        MyNft(address(nft)).safeMint(B);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, B);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        //auction creation
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+
+        uint8 index = 1;
+        bool isAuctionCreated = boundAuction.doesAuctionExist(index);
+
+        assertTrue(isAuctionCreated);
+        assertEq(isAuctionCreated, true);
+
+        uint256 userB_BalBefore = AUCTokenFacet(address(diamond)).balanceOf(B);
+        //One successful Bidding
+        boundAuction.bidOnAuctionedItem(1000e18, 1);
+
+        uint256 userB_BalAfter = AUCTokenFacet(address(diamond)).balanceOf(B);
+
+        assertEq(userB_BalBefore, userB_BalAfter + 1000e18);
+    }
+
     function generateSelectors(
         string memory _facetName
     ) internal returns (bytes4[] memory selectors) {
