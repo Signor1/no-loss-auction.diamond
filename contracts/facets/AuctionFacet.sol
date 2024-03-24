@@ -98,7 +98,10 @@ contract AuctionFacet {
         emit AuctionCreated(_newId, msg.sender, _tokenId, _startingBid);
     }
 
-    function bidOnAuctionedItem(uint256 _amount, uint8 _auctionId) external {
+    function bidOnAuctionedItem(
+        uint256 _amount,
+        uint8 _auctionId
+    ) external returns (uint256 latestBid_) {
         //checking auction by index exist
         if (l.auctions[_auctionId].auctionCreator == address(0)) {
             revert AUCTION_BY_INDEX_DOES_NOT_EXIST();
@@ -129,7 +132,7 @@ contract AuctionFacet {
         if (a.currentBid == 0) {
             a.highestBidder = msg.sender;
             a.currentBid = _amount;
-
+            latestBid_ = a.currentBid;
             emit HighestBidderUpdated(
                 a.highestBidder,
                 a.currentBid,
@@ -151,6 +154,7 @@ contract AuctionFacet {
             noLossDistribution(_amount);
 
             a.currentBid = _amount;
+            latestBid_ = a.currentBid;
             a.highestBidder = msg.sender;
 
             emit HighestBidderUpdated(
