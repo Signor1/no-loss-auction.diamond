@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
-import {LibAppConstant} from "../libraries/LipAppConstant.sol";
+import {LibAppConstant} from "../libraries/LibAppConstant.sol";
 
 error WRONG_DURATION_ENTERED();
 error WRONG_PRICE_ENTERED();
@@ -72,7 +72,7 @@ contract AuctionFacet {
             revert NOT_OWNER_OF_TOKEN_ENTERED();
         }
 
-        uint _newId = l.auctionIndex + 1;
+        uint8 _newId = l.auctionIndex + 1;
         LibAppStorage.AuctionDetail storage a = l.auctions[_newId];
 
         a.auctionId = _newId;
@@ -95,7 +95,7 @@ contract AuctionFacet {
 
     function bidOnAuctionedItem(uint256 _amount, uint8 _auctionId) external {
         //checking auction by index exist
-        if (!l.auctions[_auctionId]) {
+        if (l.auctions[_auctionId].auctionCreator == address(0)) {
             revert AUCTION_BY_INDEX_DOES_NOT_EXIST();
         }
 
@@ -119,7 +119,7 @@ contract AuctionFacet {
         }
 
         //transfering the token from the msg.sender to the address(this)
-        LipAppStorage._transferFrom(msg.sender, address(this), _amount);
+        LibAppStorage._transferFrom(msg.sender, address(this), _amount);
 
         if (a.currentBid == 0) {
             a.highestBidder = msg.sender;
@@ -141,7 +141,7 @@ contract AuctionFacet {
 
             // calculations
             //paying back previous bidder
-            payPreviousBidder(_amount);
+            payPreviousBidder(_amount, _auctionId);
             //percentage distribution
             noLossDistribution(_amount);
 
@@ -157,7 +157,9 @@ contract AuctionFacet {
     }
 
     //method to pay back previous bidder
-    function payPreviousBidder(uint256 _amount) private {
+    function payPreviousBidder(uint256 _amount, uint8 _auctionId) private {
+        LibAppStorage.AuctionDetail storage a = l.auctions[_auctionId];
+
         uint256 nextBidderPercent = (_amount * LibAppConstant.PREVIOUS_BIDDER) /
             100;
 
@@ -221,7 +223,7 @@ contract AuctionFacet {
     //collecting the auctioned item when the highest bidder
     function collectAuctionItem(uint8 _auctionId) external {
         //checking auction by index exist
-        if (!l.auctions[_auctionId]) {
+        if (l.auctions[_auctionId].auctionCreator == address(0)) {
             revert AUCTION_BY_INDEX_DOES_NOT_EXIST();
         }
         if (!l.auctions[_auctionId].hasEnded) {
@@ -250,7 +252,7 @@ contract AuctionFacet {
     //collecting the auctioned item if no bidder
     function collectAuctionedItemIfNoBidder(uint8 _auctionId) external {
         //checking auction by index exist
-        if (!l.auctions[_auctionId]) {
+        if (l.auctions[_auctionId].auctionCreator == address(0)) {
             revert AUCTION_BY_INDEX_DOES_NOT_EXIST();
         }
         if (block.timestamp > l.auctions[_auctionId].duration) {
