@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 library LibAppConstant {
     //PERCENTAGE
+    uint8 public constant OWNER_PERCENT = 90;
     uint8 public constant TOTAL_FEE = 10;
     uint8 public constant BURNABLE = 2;
     uint8 public constant DAO = 2;

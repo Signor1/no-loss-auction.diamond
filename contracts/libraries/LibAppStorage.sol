@@ -29,6 +29,7 @@ library LibAppStorage {
         uint8 auctionIndex;
         address nftContractAddress;
         mapping(uint8 => AuctionDetail) auctions;
+        uint256 ownersAmount;
     }
 
     function layoutStorage() internal pure returns (Layout storage l) {

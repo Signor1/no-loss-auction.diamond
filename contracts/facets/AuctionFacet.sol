@@ -5,6 +5,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 import {LibAppConstant} from "../libraries/LibAppConstant.sol";
 
+/*=====  Custom Errors  =====*/
 error WRONG_DURATION_ENTERED();
 error WRONG_PRICE_ENTERED();
 error NOT_OWNER_OF_TOKEN_ENTERED();
@@ -19,6 +20,7 @@ error YOU_ARE_NOT_THE_HIGHEST_BIDDER();
 contract AuctionFacet {
     LibAppStorage.Layout internal l;
 
+    /*=====  Events  =====*/
     event AuctionCreated(
         uint256 indexed auctionId,
         address indexed itemLister,
@@ -51,7 +53,9 @@ contract AuctionFacet {
         address creator,
         uint256 tokenId
     );
+    event OwnershipPaid(address from, address to, uint256 amount);
 
+    /*=====  Functions  =====*/
     function createAuction(
         uint256 _duration,
         uint256 _startingBid,
@@ -242,11 +246,35 @@ contract AuctionFacet {
 
         l.auctions[_auctionId].hasEnded = true;
 
+        payOwnerOfAuctionedItem(_auctionId);
+
         emit AuctionItemCollected(
             _auctionId,
             msg.sender,
             l.auctions[_auctionId].nftTokenId
         );
+    }
+
+    //pay owner of auctioned item
+    function payOwnerOfAuctionedItem(uint8 _auctionId) private {
+        LibAppStorage.AuctionDetail storage a = l.auctions[_auctionId];
+
+        if (!a.hasEnded) {
+            revert AUCTION_HAS_NOT_ENDED();
+        }
+
+        uint256 auctionOwnerPercentage = (a.currentBid *
+            LibAppConstant.OWNER_PERCENT) / 100;
+
+        l.ownersAmount = auctionOwnerPercentage;
+
+        //send token to owner of auctioned item
+        LibAppStorage._transferFrom(
+            address(this),
+            a.auctionCreator,
+            l.ownersAmount
+        );
+        emit OwnershipPaid(address(this), a.auctionCreator, l.ownersAmount);
     }
 
     //collecting the auctioned item if no bidder
