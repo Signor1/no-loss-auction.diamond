@@ -181,7 +181,7 @@ contract DiamondDeployer is Test, IDiamondCut {
 
         switchSigner(B);
 
-        //
+        //owner of token check
         vm.expectRevert(
             abi.encodeWithSelector(
                 AuctionFacet.NOT_OWNER_OF_TOKEN_ENTERED.selector
@@ -210,6 +210,38 @@ contract DiamondDeployer is Test, IDiamondCut {
 
         assertTrue(isAuctionCreated);
         assertEq(isAuctionCreated, true);
+    }
+
+    function testBidFailures1() public {
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        //auction creation
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+
+        uint8 index = 1;
+        bool isAuctionCreated = boundAuction.doesAuctionExist(index);
+
+        assertTrue(isAuctionCreated);
+        assertEq(isAuctionCreated, true);
+
+        //bidding
+        //bid check on non existent auction
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AuctionFacet.AUCTION_BY_INDEX_DOES_NOT_EXIST.selector
+            )
+        );
+
+        boundAuction.bidOnAuctionedItem(1000e18, 3);
     }
 
     function generateSelectors(
