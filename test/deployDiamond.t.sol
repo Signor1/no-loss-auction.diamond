@@ -7,6 +7,8 @@ import "../contracts/facets/DiamondLoupeFacet.sol";
 import "../contracts/facets/OwnershipFacet.sol";
 
 import "../contracts/facets/AUCTokenFacet.sol";
+import "../contracts/facets/AuctionFacet.sol";
+import "../contracts/MyNft.sol";
 
 import "forge-std/Test.sol";
 import "../contracts/Diamond.sol";
@@ -20,9 +22,17 @@ contract DiamondDeployer is Test, IDiamondCut {
     DiamondLoupeFacet dLoupe;
     OwnershipFacet ownerF;
     AUCTokenFacet aucTokenFacet;
+    AuctionFacet auctionFacet;
+    MyNft nft;
 
     address A = address(0xa);
     address B = address(0xb);
+    address C = address(0xc);
+    address D = address(0xd);
+    address E = address(0xe);
+    address F = address(0xf);
+
+    AuctionFacet boundAuction;
 
     function setUp() public {
         //deploy facets
@@ -31,11 +41,13 @@ contract DiamondDeployer is Test, IDiamondCut {
         dLoupe = new DiamondLoupeFacet();
         ownerF = new OwnershipFacet();
         aucTokenFacet = new AUCTokenFacet();
+        auctionFacet = new AuctionFacet();
+        nft = new MyNft(address(diamond));
 
         //upgrade diamond with facets
 
         //build cut struct
-        FacetCut[] memory cut = new FacetCut[](3);
+        FacetCut[] memory cut = new FacetCut[](4);
 
         cut[0] = (
             FacetCut({
@@ -59,20 +71,33 @@ contract DiamondDeployer is Test, IDiamondCut {
                 functionSelectors: generateSelectors("AUCTokenFacet")
             })
         );
+        cut[3] = (
+            FacetCut({
+                facetAddress: address(auctionFacet),
+                action: FacetCutAction.Add,
+                functionSelectors: generateSelectors("AuctionFacet")
+            })
+        );
 
         //upgrade diamond
         IDiamondCut(address(diamond)).diamondCut(cut, address(0x0), "");
 
-        //set rewardToken
-        // diamond.setRewardToken(address(wow));
-        A = mkaddr("staker a");
-        B = mkaddr("staker b");
+        //set NFT
+        diamond.setNFTToken(address(nft));
+
+        //set users
+        A = mkaddr("user a");
+        B = mkaddr("user b");
+        C = mkaddr("user c");
+        D = mkaddr("user d");
+        E = mkaddr("user e");
+        F = mkaddr("user f");
 
         //mint test tokens
-        // ERC20Facet(address(diamond)).mintTo(A);
-        // ERC20Facet(address(diamond)).mintTo(B);
+        AUCTokenFacet(address(diamond)).mintTo(A);
+        AUCTokenFacet(address(diamond)).mintTo(B);
 
-        // boundStaking = StakingFacet(address(diamond));
+        boundAuction = AuctionFacet(address(diamond));
     }
 
     function testStaking() public {}
