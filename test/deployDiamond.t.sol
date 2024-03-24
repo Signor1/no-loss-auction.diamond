@@ -118,6 +118,13 @@ contract DiamondDeployer is Test, IDiamondCut {
         assertEq(userA_Bal, (userA_BalAfterTx + userE_Bal));
     }
 
+    function testNFT() public {
+        switchSigner(C);
+        MyNft(address(diamond)).safeMint(C);
+        address owner = MyNft(address(diamond)).ownerOf(0);
+        assertEq(owner, C);
+    }
+
     function generateSelectors(
         string memory _facetName
     ) internal returns (bytes4[] memory selectors) {
