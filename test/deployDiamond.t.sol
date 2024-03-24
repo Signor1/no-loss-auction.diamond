@@ -100,7 +100,11 @@ contract DiamondDeployer is Test, IDiamondCut {
         boundAuction = AuctionFacet(address(diamond));
     }
 
-    function testStaking() public {}
+    function testAucTokenFacet() public {
+        uint256 userA_Bal = AUCTokenFacet(address(diamond)).balanceOf(A);
+
+        assertEq(userA_Bal, 100_000_000e18);
+    }
 
     function generateSelectors(
         string memory _facetName
