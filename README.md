@@ -1,39 +1,35 @@
-[![Mentioned in Awesome Foundry](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/crisgarner/awesome-foundry)
-# Foundry + Hardhat Diamonds
+# No-Loss Auction Diamond Contract
 
-This is a mimimal template for [Diamonds](https://github.com/ethereum/EIPs/issues/2535) which allows facet selectors to be generated on the go in solidity tests!
+The No-Loss Auction Diamond Contract is a decentralized smart contract system built on the Ethereum blockchain using Solidity. This contract enables the creation and management of zero-loss auctions for non-fungible tokens (NFTs) and fungible tokens (ERC-20) in a secure and transparent manner.
 
-## Installation
+## Features
 
-- Clone this repo
-- Install dependencies
+- **Zero-Loss Auctions**: Participants in the auction gain rewards even if they are outbid, ensuring a fair and incentivized bidding process.
+- **Support for ERC721 and ERC1155**: The contract supports both ERC721 and ERC1155 standards, allowing for auctions of both single and multiple NFTs.
+- **Customizable Auction Parameters**: Parameters such as starting bid, auction duration, and incentive distribution percentages are configurable to suit various auction scenarios.
+- **Security**: Built with security in mind, utilizing best practices in smart contract development to mitigate potential vulnerabilities.
+- **Integration with AUC ERC20 Token**: The diamond contract serves as both the auction house and the native token contract (AUC ERC20), providing seamless interaction between auctions and token transfers.
 
-```bash
-$ yarn && forge update
-```
+## Usage
 
-### Compile
+1. **Creating Auctions**: Owners of NFTs can initiate auctions for their assets by specifying auction parameters such as starting bid and duration.
+2. **Bidding**: Participants can place bids using AUC ERC20 tokens. Bids trigger incentive distributions to ensure zero-loss auctions.
+3. **Claiming Rewards**: Participants receive rewards even if they are outbid, incentivizing active participation in the auction process.
+4. **Ending Auctions**: Auctions automatically end after the specified duration, with the highest bidder winning the NFT and rewards distributed accordingly.
 
-```bash
-$ npx hardhat compile
-```
+## Getting Started
 
-## Deployment
+To deploy the No-Loss Auction Diamond Contract, follow these steps:
 
-### Hardhat
+1. Clone the repository.
+2. Install dependencies.
+3. Deploy the contract to the Ethereum blockchain using a compatible Ethereum development environment or tool.
+4. Interact with the deployed contract through supported methods and functions.
 
-```bash
-$ npx hardhat run scripts/deploy.js
-```
+## Contributing
 
-### Foundry
+Contributions to the project are welcome! Whether it's bug fixes, feature enhancements, or documentation improvements, all contributions help make the project better for everyone. Please refer to the contribution guidelines for more information.
 
-```bash
-$ forge t
-```
+## License
 
-`Note`: A lot of improvements are still needed so contributions are welcome!!
-
-Bonus: The [DiamondLoupefacet](contracts/facets/DiamondLoupeFacet.sol) uses an updated [LibDiamond](contracts/libraries//LibDiamond.sol) which utilises solidity custom errors to make debugging easier especially when upgrading diamonds. Take it for a spin!!
-
-Need some more clarity? message me [on twitter](https://twitter.com/Timidan_x), Or join the [EIP-2535 Diamonds Discord server](https://discord.gg/kQewPw2)
+This project is licensed under the [MIT License](LICENSE).
