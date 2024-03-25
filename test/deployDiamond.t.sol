@@ -801,7 +801,37 @@ contract DiamondDeployer is Test, IDiamondCut {
         vm.warp(804800);
 
         //should collect the auctioned item if time elasped and no bidder
+        boundAuction.collectAuctionedItemIfNoBidder(1);
+    }
 
+    function testCollectOfAuctionedItemIfNoBidderFailure1() public {
+        // switching to the first bidder
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        //auction creation
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+
+        uint8 index = 1;
+        bool isAuctionCreated = boundAuction.doesAuctionExist(index);
+
+        assertTrue(isAuctionCreated);
+        assertEq(isAuctionCreated, true);
+
+        // should revert if the duration have not elasped
+        vm.expectRevert(
+            abi.encodeWithSelector(AuctionFacet.AUCTION_HAVE_NOT_ENDED.selector)
+        );
+
+        //should collect the auctioned item if time elasped and no bidder
         boundAuction.collectAuctionedItemIfNoBidder(1);
     }
 
