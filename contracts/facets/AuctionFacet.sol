@@ -305,7 +305,7 @@ contract AuctionFacet {
                     l.auctions[_auctionId].auctionCreator,
                     l.auctions[_auctionId].nftTokenId
                 );
-
+                l.auctions[_auctionId].duration = block.timestamp;
                 l.auctions[_auctionId].hasEnded = true;
 
                 emit AuctionItemRetrievedBack(
