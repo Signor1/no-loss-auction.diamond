@@ -12,13 +12,14 @@ contract AuctionFacet {
     error WRONG_DURATION_ENTERED();
     error WRONG_PRICE_ENTERED();
     error NOT_OWNER_OF_TOKEN_ENTERED();
-    error AUCTION_TIME_HAS_ELASPED();
+    error AUCTION_TIME_HAVE_NOT_ELASPED();
     error AUCTION_BY_INDEX_DOES_NOT_EXIST();
     error YOUR_BID_IS_LESS_THAN_THE_STARTING_BID();
     error TOKEN_BALANCE_IS_NOT_ENOUGH();
     error YOUR_BID_IS_NOT_ENOUGH();
-    error AUCTION_HAS_NOT_ENDED();
+    error AUCTION_HAVE_NOT_ENDED();
     error YOU_ARE_NOT_THE_HIGHEST_BIDDER();
+    error AUCTION_TIME_HAVE_ELASPED();
 
     /*=====  Events  =====*/
     event AuctionCreated(
@@ -113,7 +114,7 @@ contract AuctionFacet {
         if (block.timestamp > a.duration) {
             a.hasEnded = true;
             emit AuctionEnded(a.auctionId);
-            revert AUCTION_TIME_HAS_ELASPED();
+            revert AUCTION_TIME_HAVE_ELASPED();
         }
 
         if (_amount < a.startingBid) {
@@ -260,7 +261,7 @@ contract AuctionFacet {
                 l.auctions[_auctionId].nftTokenId
             );
         } else {
-            revert AUCTION_TIME_HAS_ELASPED();
+            revert AUCTION_TIME_HAVE_NOT_ELASPED();
         }
     }
 
@@ -269,7 +270,7 @@ contract AuctionFacet {
         LibAppStorage.AuctionDetail storage a = l.auctions[_auctionId];
 
         if (!a.hasEnded) {
-            revert AUCTION_HAS_NOT_ENDED();
+            revert AUCTION_HAVE_NOT_ENDED();
         }
 
         uint256 auctionOwnerPercentage = (a.currentBid *
@@ -295,7 +296,11 @@ contract AuctionFacet {
         if (block.timestamp > l.auctions[_auctionId].duration) {
             if (l.auctions[_auctionId].currentBid == 0) {
                 //transfering the token from the address(this) to highest bidder
-                IERC721(l.nftContractAddress).safeTransferFrom(
+                IERC721(l.nftContractAddress).approve(
+                    l.auctions[_auctionId].auctionCreator,
+                    l.auctions[_auctionId].nftTokenId
+                );
+                IERC721(l.nftContractAddress).transferFrom(
                     address(this),
                     l.auctions[_auctionId].auctionCreator,
                     l.auctions[_auctionId].nftTokenId
@@ -310,7 +315,7 @@ contract AuctionFacet {
                 );
             }
         } else {
-            revert AUCTION_HAS_NOT_ENDED();
+            revert AUCTION_HAVE_NOT_ENDED();
         }
     }
 
