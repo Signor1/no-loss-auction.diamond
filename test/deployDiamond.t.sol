@@ -537,6 +537,86 @@ contract DiamondDeployer is Test, IDiamondCut {
         boundAuction.collectAuctionItem(1);
     }
 
+    function testCollectAuctionItemFailure1() public {
+        // switching to the first bidder
+        switchSigner(A);
+        MyNft(address(nft)).safeMint(A);
+        address owner = MyNft(address(nft)).ownerOf(0);
+        assertEq(owner, A);
+
+        uint256 durationInSeconds = 604800;
+        uint256 auctionAmount = 100e18;
+        uint256 tokenId = 0;
+
+        IERC721(address(nft)).approve(address(diamond), tokenId);
+
+        //auction creation
+        boundAuction.createAuction(durationInSeconds, auctionAmount, tokenId);
+
+        uint8 index = 1;
+        bool isAuctionCreated = boundAuction.doesAuctionExist(index);
+
+        assertTrue(isAuctionCreated);
+        assertEq(isAuctionCreated, true);
+
+        uint256 userA_BalBefore = AUCTokenFacet(address(diamond)).balanceOf(A);
+        //One successful Bidding
+        uint256 lastestBid = boundAuction.bidOnAuctionedItem(1000e18, 1);
+
+        uint256 userA_BalAfter = AUCTokenFacet(address(diamond)).balanceOf(A);
+
+        assertEq(userA_BalBefore, userA_BalAfter + 1000e18);
+        assertEq(lastestBid, 1000e18);
+
+        // switching to the second bidder
+        switchSigner(B);
+
+        uint256 userB_BalBefore = AUCTokenFacet(address(diamond)).balanceOf(B);
+        //One successful Bidding
+        uint256 lastestBid2 = boundAuction.bidOnAuctionedItem(10000e18, 1);
+
+        uint256 userB_BalAfter = AUCTokenFacet(address(diamond)).balanceOf(B);
+
+        assertGt(userB_BalBefore, userB_BalAfter);
+        assertEq(lastestBid2, 10000e18);
+
+        // switching to the third bidder
+        switchSigner(C);
+
+        uint256 userC_BalBefore = AUCTokenFacet(address(diamond)).balanceOf(C);
+        //One successful Bidding
+        uint256 lastestBid3 = boundAuction.bidOnAuctionedItem(100_000e18, 1);
+
+        uint256 userC_BalAfter = AUCTokenFacet(address(diamond)).balanceOf(C);
+
+        assertGt(userC_BalBefore, userC_BalAfter);
+        assertEq(lastestBid3, 100_000e18);
+
+        // switching to the fourth bidder
+        switchSigner(D);
+
+        uint256 userD_BalBefore = AUCTokenFacet(address(diamond)).balanceOf(D);
+        //One successful Bidding
+        uint256 lastestBid4 = boundAuction.bidOnAuctionedItem(1000_000e18, 1);
+
+        uint256 userD_BalAfter = AUCTokenFacet(address(diamond)).balanceOf(D);
+
+        assertGt(userD_BalBefore, userD_BalAfter);
+        assertEq(lastestBid4, 1000_000e18);
+
+        // time warp
+        vm.warp(804800);
+
+        //should revert on entering the wrong index
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AuctionFacet.AUCTION_BY_INDEX_DOES_NOT_EXIST.selector
+            )
+        );
+
+        boundAuction.collectAuctionItem(2);
+    }
+
     function generateSelectors(
         string memory _facetName
     ) internal returns (bytes4[] memory selectors) {
